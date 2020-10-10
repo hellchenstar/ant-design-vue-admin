@@ -6,7 +6,11 @@
       @change="
         e => {
           //e为当前选中值的value值
-          filterSexMethod(e, columnInfoAndMethods.column)
+          filterSexMethod(
+            e,
+            columnInfoAndMethods.confirm,
+            columnInfoAndMethods.column
+          )
         }
       "
     >
@@ -19,7 +23,6 @@
       </a-select-option>
     </a-select>
     <a-icon
-      :slot="soltIcon"
       slot-scope="filtered"
       type="down"
       :style="{ color: filtered ? '#108ee9' : undefined }"
@@ -41,10 +44,6 @@ export default {
     columnInfoAndMethods: {
       type: Object,
       required: true
-    },
-    soltIcon: {
-      type: String,
-      required: true
     }
   },
   mounted() {},
@@ -52,7 +51,8 @@ export default {
     return {}
   },
   methods: {
-    filterSexMethod(e, column) {
+    filterSexMethod(e, confirm, column) {
+      confirm()
       this.$emit('handleFilter', { value: e, column: column })
     }
   }

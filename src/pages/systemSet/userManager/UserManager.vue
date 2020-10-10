@@ -39,16 +39,6 @@
           {{ `${item.column.title}:${item.value.label}` }}
         </a-tag>
       </template>
-
-      <!-- <a-tag
-        color="blue"
-        closable
-        v-for="(item, index) in tagList"
-        :key="index"
-        @close="closeTag(index)"
-      >
-        {{ `${item.column.title}:${item.value.label}` }}
-      </a-tag> -->
     </div>
     <div class="userTable">
       <a-table :data-source="dataList" :columns="columns" bordered rowKey="Id">
@@ -71,7 +61,6 @@
             clearFilters,
             column
           }"
-          soltIcon="filterIcon"
           @handleFilter="handleFilter"
         ></tableFilterInput>
         <!-- 显示性别 -->
@@ -85,9 +74,8 @@
           slot="filterSex"
           name="filterSex"
           :list="sexList"
-          slot-scope="{ column }"
-          :columnInfoAndMethods="{ column }"
-          soltIcon="filterIcon"
+          slot-scope="{ confirm, column }"
+          :columnInfoAndMethods="{ confirm, column }"
           @handleFilter="handleFilter"
         ></tableFilterSelect>
 
@@ -95,16 +83,25 @@
         <tableFilterDatepicker
           slot="filterTime"
           name="filterTime"
-          slot-scope="{ column }"
-          :columnInfoAndMethods="{ column }"
-          soltIcon="filterIcon"
-          @handleFilterTime="handleFilter"
+          slot-scope="{ confirm, column }"
+          :columnInfoAndMethods="{ confirm, column }"
+          valueFormat="YYYY-MM-DD HH:mm:ss"
+          @handleFilter="handleFilter"
         ></tableFilterDatepicker>
         <!-- 是否启用 -->
         <span slot="Isactive" slot-scope="Isactive">
-          <a-tag v-if="Isactive" color="red">否</a-tag>
+          <a-tag v-if="!Isactive" color="red">否</a-tag>
           <a-tag v-else color="green">是</a-tag>
         </span>
+        <!-- 是否启用筛选 -->
+        <tableFilterCheckBox
+          slot="filterIsactive"
+          name="filterIsactive"
+          :list="activeList"
+          slot-scope="{ confirm, column }"
+          :columnInfoAndMethods="{ confirm, column }"
+          @handleFilter="handleFilter"
+        ></tableFilterCheckBox>
       </a-table>
     </div>
   </div>
@@ -114,6 +111,11 @@ import _ from 'lodash'
 import tableFilterSelect from '@/components/tableFilter/tableFilterSelect'
 import tableFilterInput from '@/components/tableFilter/tableFilterInput'
 import tableFilterDatepicker from '@/components/tableFilter/tableFilterDatepicker'
+import tableFilterCheckBox from '@/components/tableFilter/tableFilterCheckBox'
+const activeList = [
+  { value: 0, label: '否' },
+  { value: 1, label: '是' }
+]
 const sexList = [
   { id: '', name: '全部' },
   { id: 0, name: '未知' },
@@ -161,8 +163,7 @@ const columns = [
     title: '更新时间',
     dataIndex: 'Udate',
     key: 'Udate',
-    Operation: 'like',
-    type: 'time| checkbox | text ',
+    Operation: 'between',
     SortNum: 3,
     scopedSlots: {
       filterDropdown: 'filterTime',
@@ -174,7 +175,7 @@ const columns = [
     title: '是否启用',
     dataIndex: 'Isactive',
     key: 'Isactive',
-    Operation: '=',
+    Operation: 'in',
     SortNum: 3,
     scopedSlots: {
       filterDropdown: 'filterIsactive',
@@ -188,7 +189,8 @@ export default {
   components: {
     tableFilterSelect,
     tableFilterInput,
-    tableFilterDatepicker
+    tableFilterDatepicker,
+    tableFilterCheckBox
   },
   mounted() {
     this.getDataList()
@@ -213,11 +215,14 @@ export default {
               obj.Value = el.value.key
             } else if (obj.Operation === 'in') {
               obj.Value = el.value.key.join(',')
+            } else if (obj.Operation === 'between') {
+              obj.Value = el.value.key.join(' and ')
             }
+            // 遍历已有列表参数，如果有筛选条件，改值，如果没有，添加
             if (this.listParams.ParamItemList.length) {
               _.each(this.listParams.ParamItemList, item => {
                 if (item.Name === el.column.dataIndex) {
-                  item.Value = el.value.key
+                  item.Value = obj.Value
                 } else {
                   this.listParams.ParamItemList.push(obj)
                 }
@@ -236,6 +241,7 @@ export default {
 
   data() {
     return {
+      activeList,
       sexList,
       columns,
       dataList: [],
@@ -262,23 +268,31 @@ export default {
     // 渲染tagList
     renderTags(item) {
       if (this.tagList.length) {
-        _.each(this.tagList, (el, index) => {
-          if (el.column.dataIndex === item.column.dataIndex) {
-            // 处理选择值为空的情况
-            if (!item.value.key && item.value.key !== 0) {
-              this.tagList.splice(index, 1)
-            } else {
-              el.value.key = item.value.key
-              el.value.label = item.value.label
-            }
-          } else {
-            this.tagList.push(item)
-          }
-        })
+        let index = this.tagList.indexOf(this.tagList, item.column.dataIndex)
+        if (index === -1) {
+          this.tagList.push(item)
+        } else {
+          console.log(index)
+          this.tagList[index].value.key === item.value.key
+          this.tagList[index].value.label === item.value.label
+        }
+        // _.each(this.tagList, (el, index) => {
+        //   debugger
+        //   if (item.column.dataIndex === el.column.dataIndex) {
+        //     // 处理选择值为空的情况
+        //     if (!item.value.key && item.value.key !== 0) {
+        //       this.tagList.splice(index, 1)
+        //     } else {
+        //       el.value.key = item.value.key
+        //       el.value.label = item.value.label
+        //     }
+        //   } else {
+        //     this.tagList.push(item)
+        //   }
+        // })
       } else {
         this.tagList.push(item)
       }
-      console.log(this.tagList)
     },
     // 关闭tag的回调
     closeTag(index) {

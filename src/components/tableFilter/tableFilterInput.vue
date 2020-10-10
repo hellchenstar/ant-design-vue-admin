@@ -66,17 +66,8 @@ export default {
       type: String,
       required: true
     },
-
-    list: {
-      type: Array,
-      required: true
-    },
     columnInfoAndMethods: {
       type: Object,
-      required: true
-    },
-    soltIcon: {
-      type: String,
       required: true
     }
   },

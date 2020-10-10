@@ -9,8 +9,14 @@
     <a-range-picker
       :locale="locale"
       show-time
-      @ok="confirmDate($event, columnInfoAndMethods.column)"
-      valueFormat="YYYY-MM-DD HH:mm:ss"
+      @ok="
+        confirmDate(
+          $event,
+          columnInfoAndMethods.confirm,
+          columnInfoAndMethods.column
+        )
+      "
+      :valueFormat="valueFormat"
     >
       <template slot="renderExtraFooter">
         选择时间
@@ -28,13 +34,12 @@ export default {
       type: String,
       required: true
     },
-
-    columnInfoAndMethods: {
-      type: Object,
+    valueFormat: {
+      type: String,
       required: true
     },
-    soltIcon: {
-      type: String,
+    columnInfoAndMethods: {
+      type: Object,
       required: true
     }
   },
@@ -46,7 +51,8 @@ export default {
     }
   },
   methods: {
-    confirmDate(dates, column) {
+    confirmDate(dates, confirm, column) {
+      confirm()
       let obj = {
         key: dates,
         label: dates.join('至')
