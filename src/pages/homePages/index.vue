@@ -6,9 +6,7 @@
     <SiderBar />
     <a-layout>
       <HeaderComponent />
-      <div>
-        ==============
-      </div>
+
       <Container />
     </a-layout>
   </a-layout>

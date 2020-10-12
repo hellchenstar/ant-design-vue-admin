@@ -1,6 +1,7 @@
 // 系统设置
 const MenuManager = () => import('@/pages/systemSet/menuManager/MenuManager')
-const RoleManager = () => import('@/pages/systemSet/roleManager/RoleManager')
+const CompanyManager = () =>
+  import('@/pages/systemSet/orgManager/CompanyManager')
 const UserManager = () => import('@/pages/systemSet/userManager/UserManager')
 const systemSet = () => import('@/pages/systemSet/systemSet')
 const systemSetArr = [
@@ -18,12 +19,12 @@ const systemSetArr = [
         component: MenuManager
       },
       {
-        path: '/RoleManager',
-        name: 'RoleManager',
+        path: '/CompanyManager',
+        name: 'CompanyManager',
         meta: {
           title: '角色管理'
         },
-        component: RoleManager
+        component: CompanyManager
       },
       {
         path: '/UserManager',

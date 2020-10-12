@@ -14,11 +14,6 @@
 </template>
 <script>
 export default {
-  name: 'container',
-  data() {
-    return {
-      Content: '内容区'
-    }
-  }
+  name: 'container'
 }
 </script>

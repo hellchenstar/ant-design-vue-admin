@@ -1,8 +1,10 @@
-// 内容区所有子路由的集合
-
+/**
+ * @description: 内容区所有子路由的集合
+ * @param {type}
+ * @return {type}
+ */
 import systemSetArr from './systemSet/systemSet'
-import userManager from './systemSet/userManager'
 
-let childrenList = [...new Set(systemSetArr), ...new Set(userManager)]
+let childrenList = [...new Set(systemSetArr)]
 
 export default childrenList

@@ -20,7 +20,6 @@
       @pressEnter="
         () =>
           handleSearch(
-            columnInfoAndMethods.selectedKeys,
             columnInfoAndMethods.confirm,
             columnInfoAndMethods.column
           )
@@ -34,7 +33,6 @@
       @click="
         () =>
           handleSearch(
-            columnInfoAndMethods.selectedKeys,
             columnInfoAndMethods.confirm,
             columnInfoAndMethods.column
           )
@@ -48,7 +46,6 @@
       @click="
         () =>
           handleReset(
-            columnInfoAndMethods.selectedKeys,
             columnInfoAndMethods.confirm,
             columnInfoAndMethods.column,
             columnInfoAndMethods.clearFilters
@@ -81,7 +78,7 @@ export default {
     }
   },
   methods: {
-    handleSearch(selectedKeys, confirm, column) {
+    handleSearch(confirm, column) {
       confirm()
       let obj = {
         value: this.item,
@@ -90,13 +87,10 @@ export default {
       this.$emit('handleFilter', obj)
     },
 
-    handleReset(selectedKeys, confirm, column, clearFilters) {
+    handleReset(confirm, column, clearFilters) {
       clearFilters()
-      let str = ''
-      if (column.Operation === 'like') {
-        str = `%%`
-      }
-      this.handleSearch([str], confirm, column)
+      this.item.key = ''
+      this.handleSearch(confirm, column)
     },
     changeValue(e, method, column) {
       this.item = {

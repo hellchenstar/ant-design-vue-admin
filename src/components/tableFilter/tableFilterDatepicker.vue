@@ -9,6 +9,13 @@
     <a-range-picker
       :locale="locale"
       show-time
+      @change="
+        changeTime(
+          $event,
+          columnInfoAndMethods.confirm,
+          columnInfoAndMethods.column
+        )
+      "
       @ok="
         confirmDate(
           $event,
@@ -51,17 +58,30 @@ export default {
     }
   },
   methods: {
+    changeTime(dates, confirm, column) {
+      if (!dates.length) {
+        this.confirmDate('', confirm, column)
+      }
+    },
     confirmDate(dates, confirm, column) {
       confirm()
-      let obj = {
-        key: dates,
-        label: dates.join('至')
+      let obj = {}
+      if (dates && dates.length) {
+        obj = {
+          key: dates,
+          label: dates.join('至')
+        }
+      } else {
+        obj = {
+          key: '',
+          label: ''
+        }
       }
       let params = {
         value: obj,
         column: column
       }
-      this.$emit('handleFilterTime', params)
+      this.$emit('handleFilter', params)
     }
   }
 }

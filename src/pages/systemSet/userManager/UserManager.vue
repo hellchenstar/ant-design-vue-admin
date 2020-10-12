@@ -7,6 +7,9 @@
           v-model="searchContent"
           placeholder="用户名/身份证/电话号"
           @search="onSearch"
+          allowClear
+          @change="searchChange"
+          @pressEnter="onSearch"
         />
       </div>
       <div class="action">
@@ -40,6 +43,7 @@
         </a-tag>
       </template>
     </div>
+    <div @click="tdSet" class="tdset">列表设置</div>
     <div class="userTable">
       <a-table :data-source="dataList" :columns="columns" bordered rowKey="Id">
         <!-- 用户名筛选 -->
@@ -104,6 +108,15 @@
         ></tableFilterCheckBox>
       </a-table>
     </div>
+    <a-drawer
+      title="自定义列表"
+      placement="right"
+      :closable="false"
+      :visible="tdSetDia"
+      @close="closeDrawer"
+    >
+      <customTd :thList="thList"></customTd>
+    </a-drawer>
   </div>
 </template>
 <script>
@@ -112,6 +125,7 @@ import tableFilterSelect from '@/components/tableFilter/tableFilterSelect'
 import tableFilterInput from '@/components/tableFilter/tableFilterInput'
 import tableFilterDatepicker from '@/components/tableFilter/tableFilterDatepicker'
 import tableFilterCheckBox from '@/components/tableFilter/tableFilterCheckBox'
+import customTd from '@/components/custom/customTd'
 const activeList = [
   { value: 0, label: '否' },
   { value: 1, label: '是' }
@@ -184,13 +198,18 @@ const columns = [
     }
   }
 ]
+const thList = [
+  { name: '用户名', dataIndex: 'Name' },
+  { name: '性别', dataIndex: 'Sex' }
+]
 export default {
   name: 'UserManager',
   components: {
     tableFilterSelect,
     tableFilterInput,
     tableFilterDatepicker,
-    tableFilterCheckBox
+    tableFilterCheckBox,
+    customTd
   },
   mounted() {
     this.getDataList()
@@ -198,9 +217,8 @@ export default {
   watch: {
     tagList: {
       handler: function(val) {
-        if (!val.length) {
-          this.listParams.ParamItemList = []
-        } else {
+        this.listParams.ParamItemList = []
+        if (val.length) {
           _.each(val, el => {
             let obj = {
               Name: el.column.dataIndex,
@@ -219,20 +237,9 @@ export default {
               obj.Value = el.value.key.join(' and ')
             }
             // 遍历已有列表参数，如果有筛选条件，改值，如果没有，添加
-            if (this.listParams.ParamItemList.length) {
-              _.each(this.listParams.ParamItemList, item => {
-                if (item.Name === el.column.dataIndex) {
-                  item.Value = obj.Value
-                } else {
-                  this.listParams.ParamItemList.push(obj)
-                }
-              })
-            } else {
-              this.listParams.ParamItemList.push(obj)
-            }
+            this.listParams.ParamItemList.push(obj)
           })
         }
-
         this.getDataList()
       },
       deep: true
@@ -244,6 +251,7 @@ export default {
       activeList,
       sexList,
       columns,
+      thList,
       dataList: [],
       tagList: [],
       listParams: {
@@ -252,10 +260,17 @@ export default {
         ParamItemList: [],
         ParamOrderList: []
       },
-      searchContent: ''
+      searchContent: '',
+      tdSetDia: false //自定义列抽屉
     }
   },
   methods: {
+    tdSet() {
+      this.tdSetDia = true
+    },
+    closeDrawer() {
+      this.tdSetDia = false
+    },
     // 请求list
     getDataList() {
       this.axios.userManager.list(this.listParams).then(res => {
@@ -264,34 +279,81 @@ export default {
         }
       })
     },
-    onSearch() {},
+    searchChange() {
+      if (!this.searchContent) {
+        this.onSearch()
+      }
+    },
+    // 点击搜索
+    onSearch() {
+      let arr1 = _.filter(this.listParams.ParamItemList, el => {
+        return el.Group !== 'group'
+      })
+      let arr = []
+      if (this.searchContent) {
+        arr = [
+          {
+            Name: 'Name',
+            ValueName: 'Name',
+            Operation: 'like',
+            Value: `%${this.searchContent}%`,
+            Group: 'group'
+          },
+          {
+            Name: 'Name',
+            ValueName: 'Name',
+            Operation: 'like',
+            Value: `%${this.searchContent}%`,
+            Group: 'group'
+          },
+          {
+            Name: 'Name',
+            ValueName: 'Name',
+            Operation: 'like',
+            Value: `%${this.searchContent}%`,
+            Group: 'group'
+          }
+        ]
+      } else {
+        arr = []
+      }
+
+      this.listParams.ParamItemList = arr1.concat(arr)
+      this.getDataList()
+    },
     // 渲染tagList
     renderTags(item) {
       if (this.tagList.length) {
-        let index = this.tagList.indexOf(this.tagList, item.column.dataIndex)
-        if (index === -1) {
-          this.tagList.push(item)
-        } else {
-          console.log(index)
-          this.tagList[index].value.key === item.value.key
-          this.tagList[index].value.label === item.value.label
-        }
-        // _.each(this.tagList, (el, index) => {
-        //   debugger
-        //   if (item.column.dataIndex === el.column.dataIndex) {
-        //     // 处理选择值为空的情况
-        //     if (!item.value.key && item.value.key !== 0) {
-        //       this.tagList.splice(index, 1)
-        //     } else {
-        //       el.value.key = item.value.key
-        //       el.value.label = item.value.label
-        //     }
-        //   } else {
-        //     this.tagList.push(item)
-        //   }
-        // })
+        _.each(this.tagList, (el, index) => {
+          let result = this.tagList.some(cItem => {
+            if (cItem.column.dataIndex === item.column.dataIndex) {
+              return true
+            }
+          })
+          if (result) {
+            if (item.column.dataIndex === el.column.dataIndex) {
+              // 处理选择值为空的情况
+              if (!item.value.key && item.value.key !== 0) {
+                this.tagList.splice(index, 1)
+              } else {
+                el.value.key = item.value.key
+                el.value.label = item.value.label
+              }
+            }
+          } else {
+            if (!item.value.key && item.value.key !== 0) {
+              return
+            } else {
+              this.tagList.push(item)
+            }
+          }
+        })
       } else {
-        this.tagList.push(item)
+        if (!item.value.key && item.value.key !== 0) {
+          return
+        } else {
+          this.tagList.push(item)
+        }
       }
     },
     // 关闭tag的回调
@@ -300,10 +362,6 @@ export default {
     },
     handleFilter(obj) {
       this.renderTags(obj)
-    },
-    // 处理时间筛选
-    handleFilterTime(val) {
-      console.log(val)
     }
   }
 }
@@ -321,6 +379,11 @@ export default {
 .tags {
   width: 100%;
   margin-bottom: 20px;
+}
+.tdset {
+  width: 60px;
+  height: 30px;
+  cursor: pointer;
 }
 .userTable {
   width: 100%;

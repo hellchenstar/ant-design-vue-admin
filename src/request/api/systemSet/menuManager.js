@@ -13,7 +13,7 @@ const menuManager = {
     return axios.get(`${base.dev}/menu/Get/{${id}}`)
   },
   upDate(params) {
-    return axios.post(`${base.dev}/menu/Get`, params)
+    return axios.post(`${base.dev}/menu/Post`, params)
   }
 }
 

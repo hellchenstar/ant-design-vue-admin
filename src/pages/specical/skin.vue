@@ -72,8 +72,9 @@ export default {
     changeColor(color) {
       window.less
         .modifyVars({
-          '@primary-color': color,
-          '@success-color': color
+          '@primary-color': color, //全局默认颜色
+          '@success-color': color,
+          '@btn-primary-bg': color //按钮颜色
         })
         .then(() => {
           // 全局设置图标主题色
