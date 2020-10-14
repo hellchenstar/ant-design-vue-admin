@@ -3,6 +3,7 @@ const MenuManager = () => import('@/pages/systemSet/menuManager/MenuManager')
 const CompanyManager = () =>
   import('@/pages/systemSet/orgManager/CompanyManager')
 const UserManager = () => import('@/pages/systemSet/userManager/UserManager')
+const RoleManager = () => import('@/pages/systemSet/roleManager/RoleManager')
 const systemSet = () => import('@/pages/systemSet/systemSet')
 const systemSetArr = [
   {
@@ -19,10 +20,18 @@ const systemSetArr = [
         component: MenuManager
       },
       {
+        path: '/RoleManager',
+        name: 'RoleManager',
+        meta: {
+          title: '角色管理'
+        },
+        component: RoleManager
+      },
+      {
         path: '/CompanyManager',
         name: 'CompanyManager',
         meta: {
-          title: '角色管理'
+          title: '机构管理'
         },
         component: CompanyManager
       },
@@ -30,7 +39,7 @@ const systemSetArr = [
         path: '/UserManager',
         name: 'UserManager',
         meta: {
-          title: '角色管理'
+          title: '用户管理'
         },
         component: UserManager
       }

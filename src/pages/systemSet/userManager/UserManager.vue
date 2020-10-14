@@ -45,7 +45,13 @@
     </div>
     <div @click="tdSet" class="tdset">列表设置</div>
     <div class="userTable">
-      <a-table :data-source="dataList" :columns="columns" bordered rowKey="Id">
+      <a-table
+        :data-source="dataList"
+        :columns="columns"
+        bordered
+        rowKey="Id"
+        @change="tableChange"
+      >
         <!-- 用户名筛选 -->
         <tableFilterInput
           slot="filterName"
@@ -143,6 +149,8 @@ const columns = [
     key: 'Name',
     Operation: 'like',
     SortNum: 3,
+    sorter: true,
+    sortDirections: ['ascend', 'descend', false],
     scopedSlots: {
       filterDropdown: 'filterName',
       filterIcon: 'filterIcon',
@@ -362,6 +370,20 @@ export default {
     },
     handleFilter(obj) {
       this.renderTags(obj)
+    },
+    tableChange(pagination, filters, sorter, column) {
+      this.listParams.ParamOrderList = []
+      if (sorter.column) {
+        let obj = {
+          Name: sorter.column.dataIndex,
+          SortType: sorter.order === 'ascend' ? 0 : 1,
+          SortNum: sorter.column.SortNum
+        }
+        this.listParams.ParamOrderList.push(obj)
+      } else {
+        this.listParams.ParamOrderList = []
+      }
+      this.getDataList()
     }
   }
 }

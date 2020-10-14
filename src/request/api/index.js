@@ -5,6 +5,7 @@ import home from './special/home'
 import verifyCode from './special/verifyCode'
 import menuManager from './systemSet/menuManager'
 import userManager from './systemSet/userManager'
+import company from './systemSet/companyManager'
 
 // 导出接口
 export default {
@@ -12,6 +13,7 @@ export default {
   home,
   verifyCode,
   menuManager,
-  userManager
+  userManager,
+  company
   // ……
 }
