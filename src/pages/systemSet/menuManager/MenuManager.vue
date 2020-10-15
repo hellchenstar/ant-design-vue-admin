@@ -1,98 +1,98 @@
 <template>
-  <div class="menuContent">
-    <!-- 一级菜单 -->
-    <div class="menuLevel">
-      <h2 class="menuTitle">
-        <span>一级菜单</span>
-        <span class="btn" @click="addOrEditMenu(1, 'add')">
-          <a-icon type="plus-circle" theme="twoTone" />
+  <div>
+    <div class="userTitle">
+      <div class="searchInput">
+        <!-- <a-input-search
+          enter-button="搜索"
+          v-model="searchContent"
+          placeholder="用户名/身份证/电话号"
+          @search="onSearch"
+          allowClear
+          @change="searchChange"
+          @pressEnter="onSearch"
+        /> -->
+      </div>
+      <div class="action">
+        <a-button type="primary" @click="addOrEditMenu()">新增目录</a-button>
+      </div>
+    </div>
+    <div class="userTable">
+      <a-table
+        :columns="columns"
+        :data-source="dataList"
+        rowKey="Id"
+        bordered
+        :pagination="pagination"
+        :row-selection="rowSelection"
+        :loading="tableLoading"
+      >
+        <span slot="Parent" slot-scope="Parent">
+          <a-tag v-if="Parent" color="red">否</a-tag>
+          <a-tag v-else color="green">是</a-tag>
         </span>
-      </h2>
-      <div class="mentList">
-        <div
-          v-for="(item, index) in parentMenuList"
-          :key="index"
-          class="menuItem"
-        >
-          <div
-            :class="{ 'active-class': nowIndex === index }"
-            class="menuName"
-            @click="showChildMenu(2, item, index)"
-          >
-            <a-icon :type="item.Icon" theme="twoTone" />
-            <span style="margin-left:10px">{{ item.Name }}</span>
-          </div>
-          <div class="menuActions">
-            <a-switch
-              v-model="item.isActive"
-              checked-children="启用"
-              un-checked-children="禁用"
-              default-checked
-              @change="disabledMenu(item)"
+        <span slot="Isactive" slot-scope="text, record">
+          <a-switch
+            :defaultChecked="record.Isactive ? true : false"
+            checked-children="启用"
+            un-checked-children="禁用"
+            @change="changeActive(record)"
+          />
+        </span>
+        <span slot="action" slot-scope="row">
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>向上排序</span>
+            </template>
+            <a-icon
+              type="up-circle"
+              theme="twoTone"
+              @click="menuSort(row, 1)"
             />
-            <a-divider type="vertical" />
-            <a-icon type="up-circle" theme="twoTone" @click="upOrder(Id)" />
-            <a-divider type="vertical" />
-            <a-icon type="down-circle" theme="twoTone" @click="downOrder(Id)" />
-            <a-divider type="vertical" />
+          </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>向下排序</span>
+            </template>
+            <a-icon
+              type="down-circle"
+              theme="twoTone"
+              @click="menuSort(row, 2)"
+            />
+          </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top" v-if="!row.Parent">
+            <template slot="title">
+              <span>新增下级菜单</span>
+            </template>
+            <a-icon
+              type="plus-square"
+              theme="twoTone"
+              @click="addOrEditMenu(row, 1)"
+            >
+            </a-icon>
+          </a-tooltip>
+          <a-divider type="vertical" v-if="!row.Parent" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>编辑</span>
+            </template>
             <a-icon
               type="edit"
               theme="twoTone"
-              @click="addOrEditMenu(1, 'edit', item)"
+              @click="addOrEditMenu(row, 2)"
             />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 二级菜单 -->
-    <div class="menuLevel">
-      <h2 class="menuTitle">
-        <span>二级菜单</span>
-        <span class="btn" @click="addOrEditMenu(2, 'add')">
-          <a-icon type="plus-circle" theme="twoTone" />
+          </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>删除</span>
+            </template>
+            <a-icon type="delete" theme="twoTone" @click="delMenu(row)" />
+          </a-tooltip>
         </span>
-      </h2>
-
-      <div class="mentList" v-if="childList.length">
-        <div v-for="(item, index) in childList" :key="index" class="menuItem">
-          <div
-            class="menuName"
-            :class="{ 'active-class': nowChildIndex === index }"
-            @click="showChildMenu(3, item, index)"
-          >
-            <span style="margin-left:10px">{{ item.Name }}</span>
-          </div>
-          <div class="menuActions">
-            <a-switch
-              v-model="item.isActive"
-              checked-children="启用"
-              un-checked-children="禁用"
-              default-checked
-              @change="disabledMenu(item)"
-            />
-            <a-divider type="vertical" />
-            <a-icon type="up-circle" theme="twoTone" />
-            <a-divider type="vertical" />
-            <a-icon type="down-circle" theme="twoTone" />
-            <a-divider type="vertical" />
-            <a-icon
-              type="edit"
-              theme="twoTone"
-              @click="addOrEditMenu(2, 'edit', item)"
-            />
-          </div>
-        </div>
-      </div>
-      <div v-else class="noData">
-        <a-empty />
-      </div>
+      </a-table>
     </div>
-    <!-- 如果有三级菜单，在这里加 -->
-    <!-- <div class="menuLevel"></div> -->
-    <!-- 菜单权限 -->
-    <!-- <div class="menuLevel"></div> -->
-    <!-- 新增菜单弹框 -->
     <a-modal
       :title="dialogTitle"
       :visible="dialogVisible"
@@ -108,24 +108,17 @@
         ref="menuForm"
         :rules="rules"
       >
-        <a-form-model-item label="父级菜单" v-if="menuLevel !== 1">
-          <a-select
-            v-model="menuForm.Parent"
-            style="width: 120px;margin-left:5px"
-          >
-            <a-select-option v-for="item in parentMenuList" :key="item.Id">
-              {{ item.Name }}
-            </a-select-option>
-          </a-select>
+        <a-form-model-item label="父级菜单" v-if="showPName">
+          <a-input v-model="menuForm.ParentName" disabled />
         </a-form-model-item>
         <a-form-model-item label="菜单名称" prop="Name">
           <a-input v-model="menuForm.Name" />
         </a-form-model-item>
         <a-form-model-item label="菜单编码" prop="Url">
-          <a-input v-model="menuForm.Url" :disabled="urlDisabled" />
+          <a-input v-model="menuForm.Url" />
         </a-form-model-item>
-        <a-form-model-item label="菜单图标" prop="Icon" v-if="menuLevel === 1">
-          <a-input v-model="menuForm.Icon" />
+        <a-form-model-item label="菜单图标" prop="Icon">
+          <a-input v-model="menuForm.Icon" :disabled="iconDisabled" />
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
           <a-button type="primary" @click="saveMenuInfo('menuForm')">
@@ -145,41 +138,94 @@
 <script>
 import _ from 'lodash'
 import { mapMutations, mapState } from 'vuex'
+const rowSelection = {
+  onChange: (selectedRowKeys, selectedRows) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      'selectedRows: ',
+      selectedRows
+    )
+  },
+  onSelect: (record, selected, selectedRows) => {
+    console.log(record, selected, selectedRows)
+  },
+  onSelectAll: (selected, selectedRows, changeRows) => {
+    console.log(selected, selectedRows, changeRows)
+  }
+}
+const columns = [
+  {
+    title: '菜单名称',
+    dataIndex: 'Name'
+  },
+  {
+    title: '菜单编码',
+    dataIndex: 'Url'
+  },
+  {
+    title: '是否一级菜单',
+    dataIndex: 'Parent',
+    scopedSlots: { customRender: 'Parent' }
+  },
+  {
+    title: '是否启用',
+    dataIndex: 'Isactive',
+    scopedSlots: { customRender: 'Isactive' }
+  },
+  {
+    title: '菜单图标',
+    dataIndex: 'Icon'
+  },
+  {
+    title: '操作',
+    key: 'action',
+    scopedSlots: { customRender: 'action' }
+  }
+]
+
 export default {
   name: 'MenuManager',
   data() {
     return {
-      // 请求菜单列表参数
-      dataParams: {
+      rowSelection,
+      columns,
+      listParams: {
         PageSize: 10,
         PageIndex: 1,
-        ParamItemList: [
-          {
-            // Name和ValueName需要保持一致，如果值为Parent则为请求一级菜单
-            // Operation为is null，则是请求所有菜单，如果为=，则Value必须要有值，值为父级的Id值
-            Name: 'Parent',
-            ValueName: 'Parent',
-            Operation: 'is null',
-            Value: ''
-          }
-        ],
-        ParamOrderList: [{ Name: 'Cdate', SortType: 0, SortNum: 0 }]
+        ParamItemList: [],
+        ParamOrderList: []
       },
-      menuLevel: 1, //用作判断是一级菜单还是二级菜单
-      parentMenuList: [],
-      childList: [],
-      nowIndex: null,
-      nowChildIndex: null,
-
+      dataList: [],
+      tableLoading: false,
       dialogTitle: '新增菜单',
       dialogVisible: false,
       confirmLoading: false,
+      pagination: {
+        // 分页配置器
+        pageSize: 10, // 一页的数据限制
+        current: 1, // 当前页
+        total: 0, // 总数
+        showTotal: total => `共 ${total} 条`, // 显示总数
+        hideOnSinglePage: false, // 只有一页时是否隐藏分页器
+        showSizeChanger: true, // 是否可以改变 pageSize
+        pageSizeOptions: ['5', '10', '30'] // 指定每页可以显示多少条
+        // onShowSizeChange: (current, pagesize) => { // 改变 pageSize时的回调
+        //   this.pagination.current = current
+        //   this.pagination.pageSize = pagesize
+        //   ....
+        // },
+        // onChange: (current) => { // 切换分页时的回调，
+        // 当在页面定义change事件时，切记要把此处的事件清除，因为这两个事件重叠了，可能到时候会导致一些莫名的bug
+        //   this.pagination.current = current
+        // },
+      },
       // 新增编辑form
-      urlDisabled: false,
-
+      showPName: false,
+      iconDisabled: false,
       labelCol: { span: 4 },
       wrapperCol: { span: 14 },
       menuForm: {
+        ParentName: '',
         Parent: '',
         Id: '',
         Name: '',
@@ -187,6 +233,7 @@ export default {
         Icon: '',
         Isactive: 1 //0删除，1新增编辑
       },
+      IsActive: false,
       rules: {
         Name: [{ trigger: 'blur', message: '请输入菜单名称', required: true }],
         Url: [{ trigger: 'blur', message: '请输入菜单编码', required: true }],
@@ -201,65 +248,176 @@ export default {
   },
   mounted() {
     // 请求菜单列表
-
-    this.getMenuList(1)
+    this.getMenuList()
   },
-
   methods: {
     ...mapMutations(['reloadMenu']),
-    // 请求菜单list
-    getMenuList(level, Id) {
-      // 如果为3，则说明是点击的二级菜单
-      if (level === 3) {
-        return
-      }
-      if (level === 1) {
-        this.dataParams.ParamItemList[0].Operation = 'is null'
-        this.dataParams.ParamItemList[0].Value = ''
-      } else {
-        this.dataParams.ParamItemList[0].Operation = '='
-        this.dataParams.ParamItemList[0].Value = Id
-      }
+    // 请求菜单列表
+    getMenuList() {
+      this.tableLoading = true
       this.axios.menuManager.list(this.dataParams).then(res => {
         if (res.Code === 200) {
-          if (res.Data && res.Data.List.length > 0) {
-            _.each(res.Data.List, el => {
-              if (el.Isactive === 1) {
-                el.isActive = true
-              } else {
-                el.isActive = false
+          this.tableLoading = false
+          let arr = [] //临时父级菜单集合
+          _.each(res.Data.List, el => {
+            if (!el.Parent) {
+              el.children = []
+              arr.push(el)
+            }
+          })
+          // let list = []
+          _.each(res.Data.List, el => {
+            _.each(arr, item => {
+              if (el.Parent && el.Parent === item.Id) {
+                item.children.push(el)
               }
             })
-          }
-          if (level === 1) {
-            this.parentMenuList = res.Data.List
-          } else {
-            this.childList = res.Data.List
-          }
+          })
+          this.dataList = arr
+          this.pagination.total = res.Data.Count
         }
       })
     },
-
-    showChildMenu(level, item, index) {
-      if (level === 2) {
-        this.nowIndex = index
-      } else if (level === 3) {
-        this.nowChildIndex = index
-      } else {
-        this.nowIndex = null
-        this.nowChildIndex = null
+    // 删除
+    delMenu(row) {
+      let params = {
+        Id: row.Id,
+        Parent: row.Parent,
+        Name: row.Name,
+        Url: row.Url,
+        Icon: row.Icon,
+        Isactive: 0
       }
-      this.getMenuList(level, item.Id)
+      this.axios.menuManager.upDate(params).then(res => {
+        if (res.Code === 200) {
+          this.$message.success('删除成功')
+          this.getMenuList()
+        } else {
+          this.$message.error(res.Message)
+        }
+      })
     },
+    // 打开新增编辑菜单弹框
+    addOrEditMenu(row, type) {
+      this.dialogVisible = true
+      // 判断是新增还是查看编辑
+      if (row) {
+        // 菜单选择框复制
+        this.menuForm = {
+          Parent: row.Parent,
+          Id: row.Id,
+          Name: row.Name,
+          Url: row.Url,
+          Icon: row.Icon,
+          Isactive: row.Isactive
+        }
 
-    // 启用/禁用
-    disabledMenu(row) {
-      this.reloadMenu(!this.isReloadMenu)
-      let Isactive = 0
-      if (row.isActive) {
-        Isactive = 1
+        // type:1 新增二级菜单, 2  编辑
+        if (type === 1) {
+          this.dialogTitle = '新增下级菜单'
+          this.showPName = true
+          this.iconDisabled = true
+          this.menuForm = {
+            ParentName: row.Name,
+            Parent: row.Parent,
+            Id: '',
+            Name: '',
+            Url: '',
+            Icon: '',
+            Isactive: 1
+          }
+          this.rules['Icon'][0].required = false
+          this.rules['Url'][0].required = true
+        } else {
+          // 编辑
+          this.dialogTitle = '编辑菜单'
+          this.showPName = false
+          this.menuForm = {
+            Parent: row.Parent,
+            Id: row.Id,
+            Name: row.Name,
+            Url: row.Url,
+            Icon: row.Icon,
+            Isactive: row.Isactive
+          }
+          if (row.Parent) {
+            // 编辑二级菜单
+            this.iconDisabled = true
+            this.rules['Icon'][0].required = false
+            this.rules['Url'][0].required = true
+          } else {
+            this.iconDisabled = false
+            this.rules['Icon'][0].required = true
+            this.rules['Url'][0].required = false
+          }
+        }
       } else {
+        this.dialogTitle = '新增目录'
+
+        // 打开时重置表单
+        this.rules['Url'][0].required = false
+
+        this.menuForm = {
+          Id: '',
+          Parent: '',
+          Name: '',
+          Url: '',
+          Icon: '',
+          Isactive: 1
+        }
+        this.iconDisabled = false
+      }
+    },
+    // 保存
+    saveMenuInfo(name) {
+      this.$refs[name].validate(valid => {
+        if (valid) {
+          this.confirmLoading = true
+          this.axios.menuManager.upDate(this.menuForm).then(res => {
+            if (res.Code === 200) {
+              this.$message.success('保存成功')
+              this.getMenuList()
+              this.dialogVisible = false
+            }
+          })
+        }
+      })
+    },
+    // 取消/关闭
+    handleCancel(name) {
+      this.$refs[name].resetFields()
+      this.dialogVisible = false
+      this.rules['Url'][0].required = true
+    },
+    // 菜单排序
+    menuSort(row, type) {
+      // _.each(this.ParamOrderList,el => {
+      //   if(el.Id === row.Id) {}
+      // })
+      // this.listParams.ParamOrderList.push()
+      this.menuForm = {
+        Id: row.Id,
+        Name: row.Name,
+        Url: row.Url,
+        Icon: row.Icon,
+        Parent: row.Parent,
+        Description: row.Description,
+        Isactive: row.Isactive,
+        Sortnum: type
+      }
+      this.axios.menuManager.upDate(this.menuForm).then(res => {
+        if (res.Code === 200) {
+          this.getMenuList()
+        }
+      })
+    },
+    // 启用/禁用
+    changeActive(row) {
+      let Isactive = 0
+      if (row.Isactive) {
         Isactive = 0
+      } else {
+        Isactive = 1
       }
       let params = {
         Id: row.Id,
@@ -271,124 +429,22 @@ export default {
       }
       this.axios.menuManager.upDate(params).then(res => {
         if (res.Code === 200) {
+          this.reloadMenu(Isactive ? true : false)
           this.$message.success('修改成功')
+          this.getMenuList()
         } else {
           this.$message.error(res.Message)
         }
       })
-    },
-
-    /**
-     * @param {
-        level:菜单等级；一级菜单1，二级菜单2，...
-        type:1.新增2.编辑
-        item:菜单详情
-    * }
-     */
-    addOrEditMenu(level, type, item) {
-      this.dialogVisible = true
-      this.menuLevel = level
-      // 判断是否为新增菜单1、新增，2、编辑
-      if (type === 'add') {
-        this.menuForm = {
-          Id: '',
-          Parent: '',
-          Name: '',
-          Url: '',
-          Icon: '',
-          Isactive: 1
-        }
-      } else {
-        this.urlDisabled = true
-        this.axios.menuManager.detail(item.Id).then(res => {
-          console.log(res)
-        })
-        this.menuForm = {
-          Parent: item.Parent,
-          Id: item.Id,
-          Name: item.Name,
-          Url: item.Url,
-          Icon: item.Icon,
-          Isactive: item.Isactive
-        }
-      }
-    },
-
-    // 保存
-    saveMenuInfo(name) {
-      this.$refs[name].validate(valid => {
-        if (valid) {
-          this.confirmLoading = true
-          this.axios.menuManager.upDate(this.menuForm).then(res => {
-            if (res.Code === 200) {
-              this.$message.success('保存成功')
-              this.getMenuList(this.menuLevel, this.menuForm.Parent)
-              this.dialogVisible = false
-              // 更新左侧菜单栏
-              this.reloadMenu(true)
-            }
-          })
-        }
-      })
-    },
-    // 取消/关闭
-    handleCancel(name) {
-      this.$refs[name].resetFields()
-      this.dialogVisible = false
-      this.rules['Url'][0].required = true
     }
   }
 }
 </script>
 <style lang="less" scoped>
-.menuContent {
-  display: flex;
-  height: 100%;
+.userTitle {
   width: 100%;
-
-  .menuLevel {
-    margin-right: 20px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    height: 100%;
-    min-width: 300px;
-    width: 500px;
-    .menuTitle {
-      width: 100%;
-      padding: 20px;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      .btn {
-        cursor: pointer;
-      }
-    }
-    .mentList {
-      padding: 0 20px 20px;
-      width: 100%;
-      height: calc(~'100% - 80px');
-      overflow-y: auto;
-      .menuItem {
-        height: 60px;
-        font-size: 16px;
-        border-bottom: 1px solid #ccc;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        .menuName {
-          width: 50%;
-        }
-      }
-    }
-    .noData {
-      width: 100%;
-      // height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 </style>

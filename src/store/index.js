@@ -25,15 +25,13 @@ const mutations = {
   changeTheme(state, params) {
     state.theme = params
   },
-  changeIsRefresh(state, params) {
-    state.isRefresh = params
-  },
+
   changeUserInfo(state, params) {
     state.userInfo.userName = params.userName
     state.userInfo.avatar = params.avatar
   },
   reloadMenu(state, params) {
-    state.isRefresh = params
+    state.isReloadMenu = params
   }
 }
 export default new Vuex.Store({

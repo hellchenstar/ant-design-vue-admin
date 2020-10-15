@@ -49,6 +49,7 @@ export default {
   watch: {
     isReloadMenu: function(val, oldval) {
       console.log(val)
+      this.getMenuList()
     }
   },
   mounted() {

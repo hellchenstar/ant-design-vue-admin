@@ -371,7 +371,7 @@ export default {
     handleFilter(obj) {
       this.renderTags(obj)
     },
-    tableChange(pagination, filters, sorter, column) {
+    tableChange(pagination, filters, sorter) {
       this.listParams.ParamOrderList = []
       if (sorter.column) {
         let obj = {

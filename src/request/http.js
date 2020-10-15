@@ -2,7 +2,6 @@
 import axios from 'axios'
 import router from '@/router/index'
 import base from './baseUrl'
-import store from '@/store/index'
 
 /**
  * 提示函数
@@ -19,7 +18,6 @@ const toLogin = () => {
   let refreshToken = sessionStorage.getItem('refreshToken')
   let url = `${base.dev}/refreshtoken/Get?refresh_token=${refreshToken}`
 
-  store.commit('changeIsRefresh', false)
   axios
     .get(url)
     .then(res => {
@@ -27,7 +25,6 @@ const toLogin = () => {
         sessionStorage.removeItem('accessToken')
         sessionStorage.setItem('accessToken', res.Data.access_token)
         sessionStorage.setItem('refreshToken', res.Data.refresh_token)
-        store.commit('changeIsRefresh', true)
       }
     })
     .catch(err => {

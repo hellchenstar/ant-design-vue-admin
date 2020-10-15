@@ -18,12 +18,12 @@
     </div>
     <div class="userTable">
       <a-table
-        :data-source="dataList"
         :columns="columns"
-        bordered
+        :data-source="dataList"
         rowKey="Id"
+        bordered
+        :row-selection="rowSelection"
         :pagination="pagination"
-        @change="handleTableChange"
       >
         <span slot="action" slot-scope="row">
           <a-button type="primary" @click="addAndEdit(row)">编辑</a-button>
@@ -92,6 +92,21 @@
 </template>
 <script>
 import _ from 'lodash'
+const rowSelection = {
+  onChange: (selectedRowKeys, selectedRows) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      'selectedRows: ',
+      selectedRows
+    )
+  },
+  onSelect: (record, selected, selectedRows) => {
+    console.log(record, selected, selectedRows)
+  },
+  onSelectAll: (selected, selectedRows, changeRows) => {
+    console.log(selected, selectedRows, changeRows)
+  }
+}
 const columns = [
   {
     title: '公司名称',
@@ -138,7 +153,9 @@ export default {
   data() {
     return {
       columns,
+      rowSelection,
       dataList: [],
+
       searchContent: '',
       listParams: {
         PageSize: 10,
@@ -190,6 +207,7 @@ export default {
       this.axios.company.list(this.listParams).then(res => {
         if (res.Code === 200) {
           this.dataList = res.Data.List
+
           this.pagination.total = res.Data.Count
         }
       })
@@ -229,15 +247,26 @@ export default {
       }
 
       this.listParams.ParamItemList = arr1.concat(arr)
-      this.getDataList()
+      this.getList()
     },
     searchChange() {
       if (!this.searchContent) {
         this.onSearch()
       }
     },
-    handleTableChange(pagination, filters, sorters) {
-      console.log(pagination)
+    handleTableChange(pagination, filters, sorter) {
+      this.listParams.ParamOrderList = []
+      if (sorter.column) {
+        let obj = {
+          Name: sorter.column.dataIndex,
+          SortType: sorter.order === 'ascend' ? 0 : 1,
+          SortNum: sorter.column.SortNum
+        }
+        this.listParams.ParamOrderList.push(obj)
+      } else {
+        this.listParams.ParamOrderList = []
+      }
+      this.getDataList()
     },
     addAndEdit(row) {
       this.dialogVisible = true
