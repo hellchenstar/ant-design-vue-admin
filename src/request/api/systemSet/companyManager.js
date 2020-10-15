@@ -8,10 +8,11 @@ const company = {
   // 列表
   list(params) {
     return axios.post(`${base.dev}/company/Page`, params)
+  },
+  // 新增/更新
+  upDate(params) {
+    return axios.post(`${base.dev}/company/Post`, params)
   }
-  // upDate(params) {
-  //   return axios.post(`${base.dev}/menu`, params)
-  // }
 }
 
 export default company

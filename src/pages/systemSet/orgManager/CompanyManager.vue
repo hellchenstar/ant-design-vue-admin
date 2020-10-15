@@ -5,15 +5,14 @@
         <a-input-search
           enter-button="搜索"
           v-model="searchContent"
-          placeholder="用户名/身份证/电话号"
+          placeholder="公司名称/电话号"
           @search="onSearch"
           allowClear
-          @change="searchChange"
           @pressEnter="onSearch"
         />
       </div>
       <div class="action">
-        <a-button type="primary" @click="addAndEdit">新增</a-button>
+        <a-button type="primary" @click="addAndEdit()">新增</a-button>
       </div>
     </div>
     <div class="userTable">
@@ -25,8 +24,50 @@
         :row-selection="rowSelection"
         :pagination="pagination"
       >
+        <span slot="Isactive" slot-scope="text, record">
+          <a-switch
+            :defaultChecked="record.Isactive ? true : false"
+            checked-children="启用"
+            un-checked-children="禁用"
+            @change="changeActive(record)"
+          />
+        </span>
         <span slot="action" slot-scope="row">
-          <a-button type="primary" @click="addAndEdit(row)">编辑</a-button>
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>向上排序</span>
+            </template>
+            <a-icon
+              type="up-circle"
+              theme="twoTone"
+              @click="menuSort(row, 1)"
+            />
+          </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>向下排序</span>
+            </template>
+            <a-icon
+              type="down-circle"
+              theme="twoTone"
+              @click="menuSort(row, 2)"
+            />
+          </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>编辑</span>
+            </template>
+            <a-icon type="edit" theme="twoTone" @click="addAndEdit(row, 2)" />
+          </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>删除</span>
+            </template>
+            <a-icon type="delete" theme="twoTone" @click="delMenu(row)" />
+          </a-tooltip>
         </span>
       </a-table>
     </div>
@@ -112,33 +153,26 @@ const columns = [
     title: '公司名称',
     dataIndex: 'Name',
     key: 'Name',
-    Operation: 'like',
-    sorter: true,
-    sortDirections: ['ascend', 'descend', false]
+    Operation: 'like'
   },
   {
     title: '电话',
     dataIndex: 'Phone',
     key: 'Phone',
-    Operation: 'like',
-    sorter: true,
-    sortDirections: ['ascend', 'descend', false]
+    Operation: 'like'
   },
   {
     title: '是否启用',
     dataIndex: 'Isactive',
     key: 'Isactive',
     Operation: '=',
-    sorter: true,
-    sortDirections: ['ascend', 'descend', false]
+    scopedSlots: { customRender: 'Isactive' }
   },
   {
     title: '地址',
     dataIndex: 'Address',
     key: 'Address',
-    Operation: 'like',
-    sorter: true,
-    sortDirections: ['ascend', 'descend', false]
+    Operation: 'like'
   },
   {
     title: '操作',
@@ -228,15 +262,8 @@ export default {
             Group: 'group'
           },
           {
-            Name: 'Name',
-            ValueName: 'Name',
-            Operation: 'like',
-            Value: `%${this.searchContent}%`,
-            Group: 'group'
-          },
-          {
-            Name: 'Name',
-            ValueName: 'Name',
+            Name: 'Phone',
+            ValueName: 'Phone',
             Operation: 'like',
             Value: `%${this.searchContent}%`,
             Group: 'group'
@@ -249,11 +276,7 @@ export default {
       this.listParams.ParamItemList = arr1.concat(arr)
       this.getList()
     },
-    searchChange() {
-      if (!this.searchContent) {
-        this.onSearch()
-      }
-    },
+
     handleTableChange(pagination, filters, sorter) {
       this.listParams.ParamOrderList = []
       if (sorter.column) {
@@ -307,10 +330,46 @@ export default {
       }
     },
     saveMenuInfo(name) {
-      this.dialogVisible = false
+      console.log(this.formInfo)
+      this.$refs[name].validate(valid => {
+        if (valid) {
+          this.confirmLoading = true
+          this.axios.company.upDate(this.formInfo).then(res => {
+            if (res.Code === 200) {
+              this.$message.success('保存成功')
+              this.getList()
+              this.dialogVisible = false
+            }
+          })
+        }
+      })
     },
     handleCancel(name) {
       this.dialogVisible = false
+      this.$refs[name].resetFields()
+    },
+    changeActive(row) {
+      let Isactive = 0
+      if (row.Isactive) {
+        Isactive = 0
+      } else {
+        Isactive = 1
+      }
+      let params = {
+        Id: row.Id,
+        Name: row.Name,
+        Phone: row.Phone,
+        Address: row.Address,
+        Logo: row.Logo,
+        Isactive: Isactive
+      }
+      this.axios.company.upDate(params).then(res => {
+        if (res.Code === 200) {
+          this.$message.success('保存成功')
+          this.getList()
+          this.dialogVisible = false
+        }
+      })
     }
   }
 }

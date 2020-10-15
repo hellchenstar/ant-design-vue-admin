@@ -8,7 +8,6 @@
           placeholder="用户名/身份证/电话号"
           @search="onSearch"
           allowClear
-          @change="searchChange"
           @pressEnter="onSearch"
         /> -->
       </div>
@@ -330,8 +329,8 @@ export default {
           this.rules['Url'][0].required = true
         } else {
           // 编辑
-          this.dialogTitle = '编辑菜单'
           this.showPName = false
+          this.dialogTitle = '编辑菜单'
           this.menuForm = {
             Parent: row.Parent,
             Id: row.Id,
@@ -341,6 +340,7 @@ export default {
             Isactive: row.Isactive
           }
           if (row.Parent) {
+            this.showPName = true
             // 编辑二级菜单
             this.iconDisabled = true
             this.rules['Icon'][0].required = false
