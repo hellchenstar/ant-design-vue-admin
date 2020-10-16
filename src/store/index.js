@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex' //引入 vuex
+import createPersistedState from 'vuex-persistedstate'
 
 Vue.use(Vuex) //使用 vuex
 
@@ -16,7 +17,9 @@ const state = {
   userInfo: {
     userName: '',
     avatar: ''
-  }
+  },
+  navList: [{ key: 'home', title: '首页', active: true }],
+  currentNav: 'home'
 }
 const mutations = {
   changeCollapsed(state, params) {
@@ -32,9 +35,16 @@ const mutations = {
   },
   reloadMenu(state, params) {
     state.isReloadMenu = params
+  },
+  changeNavList(state, params) {
+    state.navList = params
+  },
+  changeCurrentNav(state, params) {
+    state.currentNav = params
   }
 }
 export default new Vuex.Store({
   state,
-  mutations
+  mutations,
+  plugins: [createPersistedState({ storage: window.sessionStorage })]
 })

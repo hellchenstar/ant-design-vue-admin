@@ -1,11 +1,11 @@
 <template>
   <a-layout-content
     :style="{
-      margin: '24px 16px',
-      padding: '24px',
+      margin: '10px',
+      marginTop: 0,
+      padding: '16px',
       background: '#fff',
       minHeight: '280px',
-      borderRadius: '10px',
       height: '100%',
       overflowY: 'auto'
     }"

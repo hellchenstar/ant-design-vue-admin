@@ -1,12 +1,13 @@
 <template>
-  <a-layout
-    style="background:#eaeaea"
-    id="components-layout-demo-custom-trigger"
-  >
-    <SiderBar />
-    <a-layout>
+  <a-layout id="components-layout-demo-custom-trigger">
+    <SiderBar ref="siderBar" />
+    <a-layout
+      :style="{
+        background: '#eaeaea'
+      }"
+    >
       <HeaderComponent />
-
+      <Nav />
       <Container />
     </a-layout>
   </a-layout>
@@ -15,17 +16,21 @@
 import SiderBar from '../specical/siderBar'
 import HeaderComponent from '../specical/headerComponent'
 import Container from '../specical/container'
+import Nav from '../specical/nav'
 export default {
   name: 'home',
   components: {
     SiderBar,
     HeaderComponent,
-    Container
+    Container,
+    Nav
   },
   computed: {},
   data() {
     return {}
-  }
+  },
+  mounted() {},
+  methods: {}
 }
 </script>
 <style>
