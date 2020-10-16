@@ -86,8 +86,6 @@ export default {
     ...mapMutations(['changeNavList', 'changeCurrentNav']),
     changeSystem(e) {
       this.systemName = e.name
-      // this.logo = e.logo
-      console.log(this.collapsed)
     },
     // 菜单展开收起
     onOpenChange(openKeys) {
