@@ -61,13 +61,6 @@
             </template>
             <a-icon type="edit" theme="twoTone" @click="addAndEdit(row, 2)" />
           </a-tooltip>
-          <a-divider type="vertical" />
-          <a-tooltip placement="top">
-            <template slot="title">
-              <span>删除</span>
-            </template>
-            <a-icon type="delete" theme="twoTone" @click="delMenu(row)" />
-          </a-tooltip>
         </span>
       </a-table>
     </div>
@@ -277,26 +270,28 @@ export default {
       this.getList()
     },
 
-    handleTableChange(pagination, filters, sorter) {
-      this.listParams.ParamOrderList = []
-      if (sorter.column) {
-        let obj = {
-          Name: sorter.column.dataIndex,
-          SortType: sorter.order === 'ascend' ? 0 : 1,
-          SortNum: sorter.column.SortNum
+    getDetail(id) {
+      this.axios.company.detail(id).then(res => {
+        if (res.Code === 200) {
+          this.formInfo = res.Data
         }
-        this.listParams.ParamOrderList.push(obj)
-      } else {
-        this.listParams.ParamOrderList = []
-      }
-      this.getDataList()
+      })
     },
     addAndEdit(row) {
       this.dialogVisible = true
       if (row) {
         this.dialogTitle = '编辑机构信息'
+        this.getDetail(row.Id)
       } else {
         this.dialogTitle = '新增机构'
+        this.formInfo = {
+          Id: '',
+          Name: '',
+          Phone: '',
+          Logo: 'xxx',
+          Address: '',
+          Isactive: 0
+        }
       }
     },
     beforeUpload(file) {
@@ -380,8 +375,5 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-  .action {
-    width: 50px;
-  }
 }
 </style>

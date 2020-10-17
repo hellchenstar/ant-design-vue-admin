@@ -8,10 +8,14 @@ const userManager = {
   // 列表
   list(params) {
     return axios.post(`${base.dev}/user/page`, params)
+  },
+  // 详情
+  detail(id) {
+    return axios.get(`${base.dev}/user/Get/${id}`)
+  },
+  upDate(params) {
+    return axios.post(`${base.dev}/user/Post`, params)
   }
-  // upDate(params) {
-  //   return axios.post(`${base.dev}/menu`, params)
-  // }
 }
 
 export default userManager

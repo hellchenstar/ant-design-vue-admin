@@ -6,6 +6,7 @@ import verifyCode from './special/verifyCode'
 import menuManager from './systemSet/menuManager'
 import userManager from './systemSet/userManager'
 import company from './systemSet/companyManager'
+import roleManager from './systemSet/roleManager'
 
 // 导出接口
 export default {
@@ -14,6 +15,7 @@ export default {
   verifyCode,
   menuManager,
   userManager,
-  company
+  company,
+  roleManager
   // ……
 }

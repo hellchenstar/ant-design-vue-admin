@@ -13,10 +13,9 @@
         />
       </div>
       <div class="action">
-        <a-button type="primary" @click="addOrEdit()">新增</a-button>
+        <a-button type="primary">新增</a-button>
       </div>
     </div>
-    <!-- tag展示 -->
     <div class="tags">
       <template v-for="(item, index) in tagList">
         <a-tooltip
@@ -44,8 +43,7 @@
         </a-tag>
       </template>
     </div>
-
-    <!-- <div @click="tdSet" class="tdset">列表设置</div> -->
+    <div @click="tdSet" class="tdset">列表设置</div>
     <div class="userTable">
       <a-table
         :data-source="dataList"
@@ -53,12 +51,12 @@
         bordered
         rowKey="Id"
         @change="tableChange"
-        :pagination="pagination"
       >
         <!-- 用户名筛选 -->
         <tableFilterInput
           slot="filterName"
           name="filterName"
+          :list="sexList"
           slot-scope="{
             setSelectedKeys,
             selectedKeys,
@@ -77,99 +75,45 @@
         ></tableFilterInput>
         <!-- 显示性别 -->
         <span slot="Sex" slot-scope="Sex">
-          <a-tag color="green" v-if="Sex === 1">男</a-tag>
-          <a-tag color="red" v-if="Sex === 2">女</a-tag>
+          <a-tag v-if="Sex === 0">未知</a-tag>
+          <a-tag v-if="Sex === 1">男</a-tag>
+          <a-tag v-if="Sex === 2">女</a-tag>
         </span>
-        <!-- 启用禁用 -->
-        <span slot="Isactive" slot-scope="text, record">
-          <a-switch
-            :checked="record.Isactive ? true : false"
-            checked-children="启用"
-            un-checked-children="禁用"
-            @click="changeIsactive(record)"
-          />
+        <!-- 性别筛选 filterSex-->
+        <tableFilterSelect
+          slot="filterSex"
+          name="filterSex"
+          :list="sexList"
+          slot-scope="{ confirm, column }"
+          :columnInfoAndMethods="{ confirm, column }"
+          @handleFilter="handleFilter"
+        ></tableFilterSelect>
+
+        <!-- 时间筛选 -->
+        <tableFilterDatepicker
+          slot="filterTime"
+          name="filterTime"
+          slot-scope="{ confirm, column }"
+          :columnInfoAndMethods="{ confirm, column }"
+          valueFormat="YYYY-MM-DD HH:mm:ss"
+          @handleFilter="handleFilter"
+        ></tableFilterDatepicker>
+        <!-- 是否启用 -->
+        <span slot="Isactive" slot-scope="Isactive">
+          <a-tag v-if="!Isactive" color="red">否</a-tag>
+          <a-tag v-else color="green">是</a-tag>
         </span>
-        <!-- 操作 -->
-        <span slot="action" slot-scope="text, record">
-          <a-tooltip placement="top">
-            <template slot="title">
-              <span>编辑</span>
-            </template>
-            <a-icon type="edit" theme="twoTone" @click="addOrEdit(record)" />
-          </a-tooltip>
-          <a-divider type="vertical" />
-        </span>
+        <!-- 是否启用筛选 -->
+        <tableFilterCheckBox
+          slot="filterIsactive"
+          name="filterIsactive"
+          :list="activeList"
+          slot-scope="{ confirm, column }"
+          :columnInfoAndMethods="{ confirm, column }"
+          @handleFilter="handleFilter"
+        ></tableFilterCheckBox>
       </a-table>
     </div>
-    <!-- 新增编辑 -->
-    <a-modal
-      :title="dialogTitle"
-      :visible="dialogVisible"
-      :confirm-loading="confirmLoading"
-      :footer="null"
-      @ok="saveFormInfo('formInfo')"
-      @cancel="handleCancel('formInfo')"
-    >
-      <a-form-model
-        :model="formInfo"
-        :label-col="labelCol"
-        :wrapper-col="wrapperCol"
-        ref="formInfo"
-        :rules="rules"
-      >
-        <a-form-model-item label="用户名称" prop="Name">
-          <a-input v-model="formInfo.Name" />
-        </a-form-model-item>
-        <a-form-model-item label="登录账号" prop="Loginid">
-          <a-input v-model="formInfo.Loginid" />
-        </a-form-model-item>
-        <a-form-model-item label="登录密码" prop="Password">
-          <a-input v-model="formInfo.Password" placeholder="●●●●●●" />
-        </a-form-model-item>
-        <a-form-model-item label="电子邮箱" prop="Email">
-          <a-input v-model="formInfo.Email" />
-        </a-form-model-item>
-        <a-form-model-item label="性别" prop="Sex">
-          <a-select v-model="formInfo.Sex">
-            <a-select-option :value="0">位置</a-select-option>
-            <a-select-option :value="1">男</a-select-option>
-            <a-select-option :value="2">女</a-select-option>
-          </a-select>
-        </a-form-model-item>
-        <a-form-model-item label="电话号码" prop="Phone">
-          <a-input v-model="formInfo.Phone" />
-        </a-form-model-item>
-        <a-form-model-item label="出生日期" prop="Birthday">
-          <a-date-picker
-            v-model="formInfo.Birthday"
-            type="date"
-            valueFormat="YYYY-MM-DD"
-            style="width: 100%;"
-          />
-        </a-form-model-item>
-        <a-form-model-item label="用户头像" prop="Photo">
-          <a-input v-model="formInfo.Photo" />
-        </a-form-model-item>
-        <a-form-model-item label="启用" prop="Isactive">
-          <a-radio-group v-model="formInfo.Isactive">
-            <a-radio :value="1"> 启用</a-radio>
-            <a-radio :value="0"> 禁用</a-radio>
-          </a-radio-group>
-        </a-form-model-item>
-        <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
-          <a-button type="primary" @click="saveFormInfo('formInfo')">
-            确定
-          </a-button>
-          <a-button
-            style="margin-left: 10px;"
-            @click="handleCancel('formInfo')"
-          >
-            取消
-          </a-button>
-        </a-form-model-item>
-      </a-form-model>
-    </a-modal>
-    <!-- 自定义列弹框 -->
     <a-drawer
       title="自定义列表"
       placement="right"
@@ -183,9 +127,21 @@
 </template>
 <script>
 import _ from 'lodash'
+import tableFilterSelect from '@/components/tableFilter/tableFilterSelect'
 import tableFilterInput from '@/components/tableFilter/tableFilterInput'
+import tableFilterDatepicker from '@/components/tableFilter/tableFilterDatepicker'
+import tableFilterCheckBox from '@/components/tableFilter/tableFilterCheckBox'
 import customTd from '@/components/custom/customTd'
-
+const activeList = [
+  { value: 0, label: '否' },
+  { value: 1, label: '是' }
+]
+const sexList = [
+  { id: '', name: '全部' },
+  { id: 0, name: '未知' },
+  { id: 1, name: '男' },
+  { id: 2, name: '女' }
+]
 const columns = [
   {
     title: '用户名',
@@ -206,47 +162,48 @@ const columns = [
     dataIndex: 'Sex',
     key: 'Sex',
     Operation: '=',
+    SortNum: 3,
     scopedSlots: {
+      filterDropdown: 'filterSex',
+      filterIcon: 'filterIcon',
       customRender: 'Sex'
     }
-  },
-  {
-    title: '电话',
-    dataIndex: 'Phone',
-    key: 'Phone',
-    Operation: 'like'
-  },
-  {
-    title: '电子邮箱',
-    dataIndex: 'Email',
-    key: 'Email',
-    Operation: 'like'
   },
   {
     title: '登录账号',
     dataIndex: 'Loginid',
     key: 'Loginid',
-    Operation: 'like'
+    Operation: 'like',
+    SortNum: 3,
+    scopedSlots: {
+      filterDropdown: 'filterLoginid',
+      filterIcon: 'filterIcon',
+      customRender: 'Loginid'
+    }
   },
   {
     title: '更新时间',
     dataIndex: 'Udate',
     key: 'Udate',
-    Operation: 'between'
-  },
-  {
-    title: '启用状态',
-    dataIndex: 'Isactive',
-    key: 'Isactive',
-    Operation: '=',
+    Operation: 'between',
+    SortNum: 3,
     scopedSlots: {
-      customRender: 'Isactive'
+      filterDropdown: 'filterTime',
+      filterIcon: 'filterIcon',
+      customRender: 'Udate'
     }
   },
   {
-    title: '操作',
-    key: 'action',
-    scopedSlots: { customRender: 'action' }
+    title: '是否启用',
+    dataIndex: 'Isactive',
+    key: 'Isactive',
+    Operation: 'in',
+    SortNum: 3,
+    scopedSlots: {
+      filterDropdown: 'filterIsactive',
+      filterIcon: 'filterIcon',
+      customRender: 'Isactive'
+    }
   }
 ]
 const thList = [
@@ -256,8 +213,10 @@ const thList = [
 export default {
   name: 'UserManager',
   components: {
+    tableFilterSelect,
     tableFilterInput,
-
+    tableFilterDatepicker,
+    tableFilterCheckBox,
     customTd
   },
   mounted() {
@@ -297,9 +256,10 @@ export default {
 
   data() {
     return {
+      activeList,
+      sexList,
       columns,
       thList,
-      // 列表
       dataList: [],
       tagList: [],
       listParams: {
@@ -308,60 +268,8 @@ export default {
         ParamItemList: [],
         ParamOrderList: []
       },
-      pagination: {
-        // 分页配置器
-        pageSize: 10, // 一页的数据限制
-        current: 1, // 当前页
-        total: 0, // 总数
-        showTotal: total => `共 ${total} 条`, // 显示总数
-        hideOnSinglePage: false, // 只有一页时是否隐藏分页器
-        showSizeChanger: true, // 是否可以改变 pageSize
-        pageSizeOptions: ['5', '10', '30'] // 指定每页可以显示多少条
-        // onShowSizeChange: (current, pagesize) => { // 改变 pageSize时的回调
-        //   this.pagination.current = current
-        //   this.pagination.pageSize = pagesize
-        //   ....
-        // },
-      },
       searchContent: '',
-      //自定义列抽屉
-      tdSetDia: false,
-      // 新增编辑
-      dialogVisible: false,
-      dialogTitle: '',
-      confirmLoading: false,
-      labelCol: { span: 4 },
-      wrapperCol: { span: 14 },
-      // 表单
-      formInfo: {
-        Id: '',
-        Name: '',
-        Loginid: '',
-        Password: '',
-        Sex: '',
-        Email: '',
-        Phone: '',
-        Birthday: '',
-        Photo: '',
-        Isactive: 1
-      },
-      rules: {
-        Name: [{ trigger: 'blur', message: '请输入用户名称', required: true }],
-        Loginid: [
-          { trigger: 'blur', message: '请输入登录账号', required: true }
-        ],
-        Password: [{ trigger: 'blur', message: '请输入密码', required: true }],
-        Sex: [{ trigger: 'change', message: '请选择性别', required: true }],
-        Email: [{ trigger: 'blur', message: '请输入电子邮箱', required: true }],
-        Phone: [{ trigger: 'blur', message: '请输入电话号码', required: true }],
-        Birthday: [
-          { trigger: 'change', message: '请选择出生日期', required: true }
-        ],
-        Photo: [{ trigger: 'change', message: '请上传头像', required: true }],
-        Isactive: [
-          { trigger: 'change', message: '请选择是否启用', required: true }
-        ]
-      }
+      tdSetDia: false //自定义列抽屉
     }
   },
   methods: {
@@ -463,7 +371,6 @@ export default {
     handleFilter(obj) {
       this.renderTags(obj)
     },
-    // 排序
     tableChange(pagination, filters, sorter) {
       this.listParams.ParamOrderList = []
       if (sorter.column) {
@@ -477,67 +384,6 @@ export default {
         this.listParams.ParamOrderList = []
       }
       this.getDataList()
-    },
-    changeIsactive(row) {
-      this.formInfo = row
-      this.formInfo.Isactive = row.Isactive ? 0 : 1
-      this.upDateData()
-    },
-    addOrEdit(row) {
-      this.dialogVisible = true
-      console.log(row)
-      if (row) {
-        this.dialogTitle = '编辑信息'
-        this.getDetail(row.Id)
-        this.rules['Password'][0].required = false
-      } else {
-        this.dialogTitle = '新增用户'
-        this.formInfo = {
-          Id: '',
-          Name: '',
-          Loginid: '',
-          Password: '',
-          Sex: '',
-          Email: '',
-          Phone: '',
-          Birthday: '',
-          Photo: '',
-          Isactive: ''
-        }
-        this.rules['Password'].required = true
-      }
-    },
-    // 详情
-    getDetail(id) {
-      this.axios.userManager.detail(id).then(res => {
-        if (res.Code === 200) {
-          this.formInfo = res.Data
-        }
-      })
-    },
-    // 更新
-    upDateData() {
-      this.axios.userManager.upDate(this.formInfo).then(res => {
-        if (res.Code === 200) {
-          this.$message.success('保存成功')
-          this.getDataList()
-        }
-      })
-    },
-    // 保存
-    saveFormInfo(name) {
-      this.$refs[name].validate(valid => {
-        if (valid) {
-          this.confirmLoading = true
-          this.upDateData()
-          this.dialogVisible = false
-        }
-      })
-    },
-    // 取消/关闭
-    handleCancel(name) {
-      this.$refs[name].resetFields()
-      this.dialogVisible = false
     }
   }
 }

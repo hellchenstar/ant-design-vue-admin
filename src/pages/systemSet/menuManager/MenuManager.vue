@@ -318,7 +318,7 @@ export default {
           this.iconDisabled = true
           this.menuForm = {
             ParentName: row.Name,
-            Parent: row.Parent,
+            Parent: row.Id,
             Id: '',
             Name: '',
             Url: '',
