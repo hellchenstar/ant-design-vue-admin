@@ -124,7 +124,11 @@
           <a-input v-model="formInfo.Loginid" />
         </a-form-model-item>
         <a-form-model-item label="登录密码" prop="Password">
-          <a-input v-model="formInfo.Password" placeholder="●●●●●●" />
+          <a-input
+            v-model="formInfo.Password"
+            type="password"
+            placeholder="●●●●●●"
+          />
         </a-form-model-item>
         <a-form-model-item label="电子邮箱" prop="Email">
           <a-input v-model="formInfo.Email" />

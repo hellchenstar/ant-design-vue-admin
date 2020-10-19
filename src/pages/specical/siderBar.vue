@@ -6,7 +6,7 @@
     collapsible
   >
     <div class="logo">
-      <a-dropdown>
+      <a-dropdown :style="dropStyle">
         <a class="ant-dropdown-link" @click="e => e.preventDefault()">
           <span>
             <img :src="logo" alt="" style="width:20px;height:20px" />
@@ -66,6 +66,13 @@ export default {
     return {
       orgList,
       logo,
+      dropStyle: {
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100%'
+      },
       // 菜单只展开一个
       rootSubmenuKeys: [],
       openKeys: [],
