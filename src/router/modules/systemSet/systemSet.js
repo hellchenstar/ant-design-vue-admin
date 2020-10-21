@@ -4,7 +4,7 @@ const CompanyManager = () =>
   import('@/pages/systemSet/orgManager/CompanyManager')
 const UserManager = () => import('@/pages/systemSet/userManager/UserManager')
 const RoleManager = () => import('@/pages/systemSet/roleManager/RoleManager')
-const systemSet = () => import('@/pages/systemSet/systemSet')
+const systemSet = () => import('@/pages/systemSet/index')
 const systemSetArr = [
   {
     path: '/systemSet',
@@ -35,6 +35,7 @@ const systemSetArr = [
         },
         component: CompanyManager
       },
+
       {
         path: '/UserManager',
         name: 'UserManager',

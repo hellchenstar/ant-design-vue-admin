@@ -6,7 +6,7 @@
     collapsible
   >
     <div class="logo">
-      <a-dropdown :style="dropStyle">
+      <!-- <a-dropdown :style="dropStyle">
         <a class="ant-dropdown-link" @click="e => e.preventDefault()">
           <span>
             <img :src="logo" alt="" style="width:20px;height:20px" />
@@ -19,7 +19,7 @@
             <a @click="changeSystem(item)">{{ item.name }}</a></a-menu-item
           >
         </a-menu>
-      </a-dropdown>
+      </a-dropdown> -->
     </div>
     <a-menu
       mode="inline"
@@ -152,7 +152,6 @@ export default {
               }
             })
           })
-
           this.menuList = arr
         }
       })

@@ -56,7 +56,7 @@
             <a-icon
               type="down-circle"
               theme="twoTone"
-              @click="menuSort(row, 2)"
+              @click="menuSort(row, 0)"
             />
           </a-tooltip>
           <a-divider type="vertical" />
@@ -81,13 +81,6 @@
               theme="twoTone"
               @click="addOrEditMenu(row, 2)"
             />
-          </a-tooltip>
-          <a-divider type="vertical" />
-          <a-tooltip placement="top">
-            <template slot="title">
-              <span>删除</span>
-            </template>
-            <a-icon type="delete" theme="twoTone" @click="delMenu(row)" />
           </a-tooltip>
         </span>
       </a-table>
@@ -264,7 +257,6 @@ export default {
               arr.push(el)
             }
           })
-          // let list = []
           _.each(res.Data.List, el => {
             _.each(arr, item => {
               if (el.Parent && el.Parent === item.Id) {
@@ -277,40 +269,12 @@ export default {
         }
       })
     },
-    // 删除
-    delMenu(row) {
-      let params = {
-        Id: row.Id,
-        Parent: row.Parent,
-        Name: row.Name,
-        Url: row.Url,
-        Icon: row.Icon,
-        Isactive: 0
-      }
-      this.axios.menuManager.upDate(params).then(res => {
-        if (res.Code === 200) {
-          this.$message.success('删除成功')
-          this.getMenuList()
-        } else {
-          this.$message.error(res.Message)
-        }
-      })
-    },
+
     // 打开新增编辑菜单弹框
     addOrEditMenu(row, type) {
       this.dialogVisible = true
       // 判断是新增还是查看编辑
       if (row) {
-        // 菜单选择框复制
-        this.menuForm = {
-          Parent: row.Parent,
-          Id: row.Id,
-          Name: row.Name,
-          Url: row.Url,
-          Icon: row.Icon,
-          Isactive: row.Isactive
-        }
-
         // type:1 新增二级菜单, 2  编辑
         if (type === 1) {
           this.dialogTitle = '新增下级菜单'
@@ -326,7 +290,6 @@ export default {
             Isactive: 1
           }
           this.rules['Icon'][0].required = false
-          this.rules['Url'][0].required = true
         } else {
           // 编辑
           this.showPName = false
@@ -337,25 +300,23 @@ export default {
             Name: row.Name,
             Url: row.Url,
             Icon: row.Icon,
-            Isactive: row.Isactive
+            Isactive: row.Isactive,
+            Sortnum: row.Sortnum
           }
           if (row.Parent) {
             this.showPName = true
             // 编辑二级菜单
             this.iconDisabled = true
             this.rules['Icon'][0].required = false
-            this.rules['Url'][0].required = true
           } else {
             this.iconDisabled = false
             this.rules['Icon'][0].required = true
-            this.rules['Url'][0].required = false
           }
         }
       } else {
         this.dialogTitle = '新增目录'
 
         // 打开时重置表单
-        this.rules['Url'][0].required = false
 
         this.menuForm = {
           Id: '',
@@ -387,25 +348,10 @@ export default {
     handleCancel(name) {
       this.$refs[name].resetFields()
       this.dialogVisible = false
-      this.rules['Url'][0].required = true
     },
     // 菜单排序
     menuSort(row, type) {
-      // _.each(this.ParamOrderList,el => {
-      //   if(el.Id === row.Id) {}
-      // })
-      // this.listParams.ParamOrderList.push()
-      this.menuForm = {
-        Id: row.Id,
-        Name: row.Name,
-        Url: row.Url,
-        Icon: row.Icon,
-        Parent: row.Parent,
-        Description: row.Description,
-        Isactive: row.Isactive,
-        Sortnum: type
-      }
-      this.axios.menuManager.upDate(this.menuForm).then(res => {
+      this.axios.menuManager.order(row.Id, type).then(res => {
         if (res.Code === 200) {
           this.getMenuList()
         }

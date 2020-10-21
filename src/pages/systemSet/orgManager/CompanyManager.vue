@@ -61,6 +61,17 @@
             </template>
             <a-icon type="edit" theme="twoTone" @click="addAndEdit(row, 2)" />
           </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>新增机构人员</span>
+            </template>
+            <a-icon
+              type="plus-square"
+              theme="twoTone"
+              @click="addOrgUser(row)"
+            />
+          </a-tooltip>
         </span>
       </a-table>
     </div>
@@ -97,7 +108,7 @@
             :show-upload-list="false"
             action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
             :before-upload="beforeUpload"
-            @change="handleChange"
+            @change="handleUploadChange"
           >
             <img v-if="formInfo.Logo" :src="formInfo.Logo" alt="avatar" />
             <div v-else>
@@ -121,6 +132,34 @@
           </a-button>
         </a-form-model-item>
       </a-form-model>
+    </a-modal>
+    <!-- 公司人员配置弹框 -->
+    <a-modal
+      :visible="orgAndUserVisible"
+      title="新增人员"
+      width="50%"
+      :bodyStyle="{
+        display: 'flex',
+        justifyContent: 'center'
+      }"
+      @cancel="closeAddOrgDia"
+    >
+      <a-transfer
+        :data-source="userList"
+        show-search
+        :list-style="{
+          width: '250px',
+          height: '300px'
+        }"
+        :operations="['添加', '删除']"
+        :target-keys="targetKeys"
+        :render="item => `${item.title}-${item.description}`"
+        @change="handleUserChange"
+      >
+        <span slot="notFoundContent">
+          没数据
+        </span>
+      </a-transfer>
     </a-modal>
   </div>
 </template>
@@ -224,7 +263,12 @@ export default {
         Address: [
           { trigger: 'blur', message: '请输入机构地址', required: true }
         ]
-      }
+      },
+      // 新增公司人员
+      orgAndUserVisible: false,
+      userList: [],
+      targetKeys: [],
+      currentOrgId: ''
     }
   },
   methods: {
@@ -311,7 +355,7 @@ export default {
       reader.addEventListener('load', () => callback(reader.result))
       reader.readAsDataURL(img)
     },
-    handleChange(info) {
+    handleUploadChange(info) {
       if (info.file.status === 'uploading') {
         this.loading = true
         return
@@ -365,6 +409,80 @@ export default {
           this.dialogVisible = false
         }
       })
+    },
+    // 新增机构人员
+    async addOrgUser(row) {
+      this.orgAndUserVisible = true
+      this.currentOrgId = row.Id
+      await this.getAllUser()
+      await this.getCurrentOrgUser()
+    },
+    closeAddOrgDia() {
+      this.orgAndUserVisible = false
+      this.userList = []
+      this.targetKeys = []
+      this.currentOrgId = ''
+    },
+    // 获取所有用户
+    getAllUser() {
+      return new Promise(resolve => {
+        this.axios.userManager.list().then(res => {
+          if (res.Code === 200) {
+            _.each(res.Data.List, el => {
+              let obj = {
+                key: el.Id,
+                title: el.Name,
+                description: 'left'
+              }
+              this.userList.push(obj)
+            })
+          } else {
+            this.userList = []
+          }
+          console.log(this.userList)
+        })
+        resolve()
+      })
+    },
+    // 获取当前公司下的用户列表
+    getCurrentOrgUser() {
+      return new Promise(resolve => {
+        this.axios.company
+          .getCurrentOrgUserList(this.currentOrgId)
+          .then(res => {
+            if (res.Code === 200) {
+              _.each(res.Data, el => {
+                this.targetKeys.push(el.FwUserId)
+              })
+            } else {
+              this.targetKeys = []
+            }
+          })
+        resolve()
+      })
+    },
+    handleUserChange(targetKeys, direction, moveKeys) {
+      this.targetKeys = targetKeys
+      // direction:right 添加，left 删除
+      let obj = {
+        FwCompanyId: this.currentOrgId,
+        FwUserId: targetKeys
+      }
+      if (direction === 'right') {
+        this.axios.company.addCompanyUser(obj).then(res => {
+          if (res.Code !== 200) {
+            this.$message.error('操作失败')
+            return
+          }
+        })
+      } else {
+        this.axios.company.deleteCompanyUser(obj).then(res => {
+          if (res.Code !== 200) {
+            this.$message.error('操作失败')
+            return
+          }
+        })
+      }
     }
   }
 }

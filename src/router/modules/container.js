@@ -4,6 +4,7 @@
  * @return {type}
  */
 import systemSetArr from './systemSet/systemSet'
+import statisticsArr from './statistics/statistics'
 const home = () => import('@/pages/homePages/home')
 
 let childrenList = [
@@ -16,7 +17,8 @@ let childrenList = [
     },
     component: home
   },
-  ...new Set(systemSetArr)
+  ...new Set(systemSetArr),
+  ...new Set(statisticsArr)
 ]
 
 export default childrenList

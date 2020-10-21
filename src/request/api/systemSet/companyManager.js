@@ -15,6 +15,19 @@ const company = {
   // 新增/更新
   upDate(params) {
     return axios.post(`${base.dev}/company/Post`, params)
+  },
+  // 获取当前机构下的人员list
+  getCurrentOrgUserList(id) {
+    // type:1.根据公司id查人员 2.根据人员id查公司
+    return axios.get(`${base.dev}/companyuser/Get/${id}?type=1`)
+  },
+  // 新增公司人员
+  addCompanyUser(params) {
+    return axios.post(`${base.dev}/companyuser/Post`, params)
+  },
+  // 新增公司人员
+  deleteCompanyUser(params) {
+    return axios.post(`${base.dev}/companyuser/Detele`, params)
   }
 }
 

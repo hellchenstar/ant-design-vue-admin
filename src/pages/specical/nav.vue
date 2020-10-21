@@ -1,13 +1,20 @@
 <template>
   <div>
     <div class="navList">
-      <a-tabs v-model="activeKey" type="editable-card" hideAdd @edit="onEdit">
+      <a-tabs
+        v-model="activeKey"
+        type="editable-card"
+        @change="navClick"
+        hideAdd
+        @edit="onEdit"
+        @prevClick="callback"
+        @nextClick="callback"
+      >
         <a-tab-pane
           v-for="item in navList"
           :key="item.key"
           :tab="item.title"
           defaultActiveKey="home"
-          @click="navClick"
         >
         </a-tab-pane>
       </a-tabs>
@@ -84,6 +91,9 @@ export default {
       this.changeNavList(this.navList)
       this.changeCurrentNav(this.activeKey)
       this.$router.push(this.activeKey)
+    },
+    callback(val) {
+      console.log(val)
     }
   }
 }

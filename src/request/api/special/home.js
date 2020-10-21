@@ -12,7 +12,7 @@ const home = {
   getUserRole(params) {
     return axios.post(`${base.test}/Values`, params)
   },
-  // 获取菜单列表
+  // 获取当前用户菜单列表
   getMenuList() {
     return axios.get(`${base.test}/menu/Get`)
   }
