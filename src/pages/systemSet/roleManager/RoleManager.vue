@@ -71,6 +71,17 @@
               @click="empower(row)"
             />
           </a-tooltip>
+          <a-divider type="vertical" />
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>角色人员管理</span>
+            </template>
+            <a-icon
+              type="contacts"
+              theme="twoTone"
+              @click="roleAndUserHandle(row)"
+            />
+          </a-tooltip>
         </span>
       </a-table>
     </div>
@@ -116,7 +127,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <!-- 菜单授权弹框 -->
+    <!-- 角色菜单授权弹框 -->
     <a-modal
       :title="empowerTitle"
       :visible="empowerVisible"
@@ -140,6 +151,36 @@
           取消
         </a-button>
       </div>
+    </a-modal>
+    <!-- 角色人员管理弹框 -->
+    <a-modal
+      :visible="roleAndUserVisible"
+      title="新增人员"
+      width="50%"
+      :bodyStyle="{
+        display: 'flex',
+        justifyContent: 'center'
+      }"
+      @cancel="closeAddUserDia"
+      :footer="null"
+    >
+      <a-transfer
+        :data-source="userList"
+        show-search
+        :list-style="{
+          width: '250px',
+          height: '300px'
+        }"
+        :filter-option="filterOption"
+        :operations="['添加', '删除']"
+        :target-keys="targetKeys"
+        :render="item => `${item.title}-${item.description}`"
+        @change="handleUserChange"
+      >
+        <span slot="notFoundContent">
+          没数据
+        </span>
+      </a-transfer>
     </a-modal>
   </div>
 </template>
@@ -226,7 +267,11 @@ export default {
         key: 'Id'
       },
       currentRoleId: '',
-      checkedKeys: []
+      checkedKeys: [],
+      // 角色人员添加
+      roleAndUserVisible: false,
+      userList: [],
+      targetKeys: []
     }
   },
   methods: {
@@ -408,6 +453,87 @@ export default {
       this.empowerVisible = false
       this.currentRoleId = ''
       this.checkedKeys = []
+    },
+
+    // change当前角色下人员
+    async roleAndUserHandle(row) {
+      this.roleAndUserVisible = true
+      this.currentRoleId = row.Id
+      await this.getAllUser()
+      await this.getCurrentRoleUser()
+    },
+    // 获取所有用户
+    getAllUser() {
+      return new Promise(resolve => {
+        this.axios.userManager.getAllUser().then(res => {
+          if (res.Code === 200) {
+            _.each(res.Data, el => {
+              let obj = {
+                key: el.Id,
+                title: el.Name,
+                description: 'left'
+              }
+              this.userList.push(obj)
+            })
+          } else {
+            this.userList = []
+          }
+        })
+        resolve()
+      })
+    },
+
+    // 获取当前角色下的用户列表
+    getCurrentRoleUser() {
+      return new Promise(resolve => {
+        this.axios.roleManager
+          .getCurrentRoleUserList(this.currentRoleId)
+          .then(res => {
+            if (res.Code === 200) {
+              _.each(res.Data, el => {
+                this.targetKeys.push(el.FwUserId)
+              })
+            } else {
+              this.targetKeys = []
+            }
+          })
+        resolve()
+      })
+    },
+    // 过滤
+    // 过滤
+    filterOption(inputValue, option) {
+      return option.title.indexOf(inputValue) > -1
+    },
+    // 处理人员变化
+    handleUserChange(targetKeys, direction, moveKeys) {
+      // direction:right 添加，left 删除
+      let obj = {
+        FwRoleId: this.currentRoleId,
+        FwUserId: targetKeys
+      }
+      if (direction === 'right') {
+        this.axios.roleManager.addUser(obj).then(res => {
+          if (res.Code !== 200) {
+            this.$message.error('操作失败')
+            return
+          }
+        })
+      } else {
+        this.axios.roleManager.deleteUser(obj).then(res => {
+          if (res.Code !== 200) {
+            this.$message.error('操作失败')
+            return
+          }
+        })
+      }
+      this.targetKeys = targetKeys
+    },
+    closeAddUserDia() {
+      this.roleAndUserVisible = false
+      this.userList = []
+      this.targetKeys = []
+      this.currentRoleId = ''
     }
   }
 }

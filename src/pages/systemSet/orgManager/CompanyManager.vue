@@ -143,6 +143,7 @@
         justifyContent: 'center'
       }"
       @cancel="closeAddOrgDia"
+      :footer="null"
     >
       <a-transfer
         :data-source="userList"
@@ -151,6 +152,7 @@
           width: '250px',
           height: '300px'
         }"
+        :filter-option="filterOption"
         :operations="['添加', '删除']"
         :target-keys="targetKeys"
         :render="item => `${item.title}-${item.description}`"
@@ -426,9 +428,9 @@ export default {
     // 获取所有用户
     getAllUser() {
       return new Promise(resolve => {
-        this.axios.userManager.list().then(res => {
+        this.axios.userManager.getAllUser().then(res => {
           if (res.Code === 200) {
-            _.each(res.Data.List, el => {
+            _.each(res.Data, el => {
               let obj = {
                 key: el.Id,
                 title: el.Name,
@@ -461,6 +463,10 @@ export default {
         resolve()
       })
     },
+    // 过滤
+    filterOption(inputValue, option) {
+      return option.title.indexOf(inputValue) > -1
+    },
     handleUserChange(targetKeys, direction, moveKeys) {
       this.targetKeys = targetKeys
       // direction:right 添加，left 删除
@@ -483,6 +489,7 @@ export default {
           }
         })
       }
+      this.targetKeys = targetKeys
     }
   }
 }

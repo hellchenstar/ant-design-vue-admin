@@ -15,6 +15,9 @@ const userManager = {
   },
   upDate(params) {
     return axios.post(`${base.dev}/user/Post`, params)
+  },
+  getAllUser() {
+    return axios.get(`${base.dev}/user/GetAll`)
   }
 }
 

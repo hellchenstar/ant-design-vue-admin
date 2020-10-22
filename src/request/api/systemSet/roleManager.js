@@ -25,6 +25,19 @@ const roleManager = {
   // 更新角色授权菜单
   updateRoleAndMenu(params) {
     return axios.post(`${base.dev}/rolemenu/BatchUpdate`, params)
+  },
+  // 获取当年角色下用户list
+  getCurrentRoleUserList(id) {
+    // type:1.根据公司id查人员 2.根据人员id查公司
+    return axios.get(`${base.dev}/roleuser/Get/${id}?type=1`)
+  },
+  // 新增角色人员
+  addUser(params) {
+    return axios.post(`${base.dev}/roleuser/Post`, params)
+  },
+  //删除角色人员
+  deleteUser(params) {
+    return axios.post(`${base.dev}/roleuser/Delete`, params)
   }
 }
 
